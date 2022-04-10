@@ -43,6 +43,12 @@ firstDataRow = Application.InputBox _
     Default:=firstDataRow, _
     Type:=2 _
     )
+    
+'エラー処理
+If Err.Number <> 0 Then
+    MsgBox "キャンセルされました。"
+    Exit Sub
+End If
 
 '処理の実行
 Dim execRow As Long: execRow = firstDataRow
@@ -54,6 +60,7 @@ For i = firstDataRow To lastDataRow
     'ヘッダーをコピー
     For j = firstHeaderRow To lastHeaderRow
         masterSheet.Rows(j).Copy
+        createdWorkbook.ActiveSheet.Rows(j).PasteSpecial (xlPasteColumnWidths)
         createdWorkbook.ActiveSheet.Rows(j).PasteSpecial (xlPasteAll)
     Next j
     'データをコピー
