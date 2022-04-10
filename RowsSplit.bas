@@ -2,6 +2,12 @@ Option Explicit
 
 Sub RowsSplit()
 
+Dim masterWorkbook As Workbook
+Set masterWorkbook = ThisWorkbook
+
+Dim masterSheet As Worksheet
+Set masterSheet = masterWorkbook.ActiveSheet
+
 Dim headerRange As Range
 Set headerRange = Application.InputBox _
     ( _
@@ -20,7 +26,7 @@ End If
 Dim firstHeaderRow As Long
 Dim lastHeaderRow As Long
 Dim lastCol As Long
-firstheadeerrow = headerRange.row
+firstHeaderRow = headerRange.row
 lastHeaderRow = headerRange.Rows(headerRange.Rows.Count).row
 lastCol = headerRange.CurrentRegion.Columns.Count
 'テーブルの最後の行を取得する
@@ -44,31 +50,23 @@ Dim i As Long
 For i = firstDataRow To lastDataRow
     Dim createdWorkbook As Workbook
     Set createdWorkbook = Workbooks.Add
+    Dim j As Long
     'ヘッダーをコピー
-    createdWorkbook.Range (headerRange)
+    For j = firstHeaderRow To lastHeaderRow
+        masterSheet.Rows(j).Copy
+        createdWorkbook.ActiveSheet.Rows(j).PasteSpecial (xlPasteAll)
+    Next j
     'データをコピー
+    masterSheet.Rows(i).Copy
+    createdWorkbook.ActiveSheet.Rows(j).PasteSpecial (xlPasteAll)
+    
+    Application.CutCopyMode = False
     
     Dim filename As String
-    filename = td(1, 1).Value
-    wb.SaveAs ThisWorkbook.Path & "\" & filename & ".xlsx"
-    wb.Close
-    
+    filename = "【" & createdWorkbook.ActiveSheet.Cells(lastHeaderRow + 1, 1).Value & "】" & createdWorkbook.ActiveSheet.Cells(lastHeaderRow + 1, 2).Value
+    createdWorkbook.SaveAs ThisWorkbook.Path & "\" & filename & ".xlsx"
+    createdWorkbook.Close
 Next i
-
 
 End Sub
 
-Function Split(th As Range, td As Range)
-    Dim createdWorkbook As Workbook
-    Set createdWorkbook = Workbooks.Add
-    
-    'ヘッダーをコピー
-    createdWorkbook.Range (headerRange)
-    'データをコピー
-
-    
-    Dim filename As String
-    filename = td(1, 1).Value
-    wb.SaveAs ThisWorkbook.Path & "\" & filename & ".xlsx"
-    wb.Close
-End Function
