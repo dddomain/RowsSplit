@@ -10,18 +10,26 @@ Set headerRange = Application.InputBox _
     Type:=8 _
     )
 
+'エラー処理
 If Err.Number <> 0 Then
     MsgBox "キャンセルされました。"
     Exit Sub
 End If
 
-'ヘッダー範囲からテーブルの最後の行を取得する
+'ヘッダーの最初と最後の行及びテーブルの最後の列を取得する
+Dim firstHeaderRow As Long
+Dim lastHeaderRow As Long
 Dim lastCol As Long
+firstheadeerrow = headerRange.row
+lastHeaderRow = headerRange.Rows(headerRange.Rows.Count).row
 lastCol = headerRange.CurrentRegion.Columns.Count
+'テーブルの最後の行を取得する
+Dim lastDataRow As Long
+lastDataRow = Cells(Rows.Count, 1).End(xlUp).row
 
 'ヘッダー範囲から最初のデータ行を取得する
 Dim firstDataRow As Long
-firstDataRow = headerRange.Rows(headerRange.Rows.Count).row + 1
+firstDataRow = lastHeaderRow + 1
 firstDataRow = Application.InputBox _
     ( _
     prompt:="データ範囲は" & firstDataRow & "行目からでよろしいですか？", _
@@ -30,27 +38,37 @@ firstDataRow = Application.InputBox _
     Type:=2 _
     )
 
+'処理の実行
+Dim execRow As Long: execRow = firstDataRow
+Dim i As Long
+For i = firstDataRow To lastDataRow
+    Dim createdWorkbook As Workbook
+    Set createdWorkbook = Workbooks.Add
+    'ヘッダーをコピー
+    createdWorkbook.Range (headerRange)
+    'データをコピー
+    
+    Dim filename As String
+    filename = td(1, 1).Value
+    wb.SaveAs ThisWorkbook.Path & "\" & filename & ".xlsx"
+    wb.Close
+    
+Next i
+
+
 End Sub
 
 Function Split(th As Range, td As Range)
-    Dim wb As Workbook
-    Set wb = Workbooks.Add
+    Dim createdWorkbook As Workbook
+    Set createdWorkbook = Workbooks.Add
     
-    Dim row As Long
-    Dim col As Long
-    row = td.Rows.Count
-    col = td.Columns.Count
+    'ヘッダーをコピー
+    createdWorkbook.Range (headerRange)
+    'データをコピー
+
     
-    With wb.Worksheets(1)
-        'header
-        Range(.Cells(1, 1), .Cells(1, col)).Value = th.Value
-        'data
-        Range(.Cells(2, 1), .Cells(row, col)).Value = td.Value
-    End With
-    
-    Dim fn As String
-    fn = td(1, 1).Value
-    
-    wb.SaveAs ThisWorkbook.Path & "\" & fn & ".xlsx"
+    Dim filename As String
+    filename = td(1, 1).Value
+    wb.SaveAs ThisWorkbook.Path & "\" & filename & ".xlsx"
     wb.Close
 End Function
